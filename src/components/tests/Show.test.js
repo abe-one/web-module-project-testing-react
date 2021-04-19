@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { getByTestId, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Show from "./../Show";
@@ -29,7 +29,21 @@ const testShow = {
       "https://static.tvmaze.com/uploads/images/original_untouched/200/501942.jpg",
   },
   seasons: [
-    { id: 0, name: "Season 1", episodes: [] },
+    {
+      id: 0,
+      name: "Season 1",
+      episodes: [
+        {
+          id: 1,
+          name: "eppi",
+          image: null,
+          season: 1,
+          number: 1,
+          summary: "The show starts",
+          runtime: 1,
+        },
+      ],
+    },
     { id: 1, name: "Season 2", episodes: [] },
   ],
   summary:
@@ -60,12 +74,14 @@ test("renders testShow and no selected Season without errors", () => {
 
 test("renders Loading component when prop show is null", () => {
   render(<Show show={null} />);
+  expect(screen.getByTestId("loading-container")).toBeInTheDocument();
 });
 
 test("renders same number of options seasons are passed in", () => {
   //Arrange
   render(<Show show={testShow} selectedSeason="none" />);
   const options = screen.getAllByTestId("season-option");
+
   // Act
   // Assert
   expect(options.length).toEqual(testShow.seasons.length);
@@ -73,20 +89,30 @@ test("renders same number of options seasons are passed in", () => {
 
 test("handleSelect is called when an season is selected", () => {
   //Arrange
-  const handleSelect = jest.fn;
+  const handleSelect = jest.fn();
   render(
     <Show show={testShow} selectedSeason="none" handleSelect={handleSelect} />
   );
   const selector = screen.getByLabelText(/select a season/i);
-
   //Act
-  userEvent.selectOptions(selector, 0);
+  userEvent.selectOptions(selector, screen.getByText(/season 1/i));
 
   //Assert
-  expect(handleSelect).not.toHaveBeenCalled();
+  expect(handleSelect).toHaveBeenCalled();
 });
 
-test("component renders when no seasons are selected and when rerenders with a season passed in", () => {});
+test("component renders when no seasons are selected and when rerenders with a season passed in", () => {
+  //Arrange
+  const { rerender } = render(<Show show={testShow} selectedSeason="none" />);
+
+  //Assert
+  expect(screen.queryByAltText("./stranger_things.png")).toBeNull();
+
+  // Act
+  rerender(<Show show={testShow} selectedSeason={0} />);
+
+  expect(screen.getByAltText("./stranger_things.png")).toBeInTheDocument();
+});
 
 //Tasks:
 //1. Build an example data structure that contains the show data in the correct format. A show should contain a name, a summary and an array of seasons, each with a id, name and (empty) list of episodes within them. Use console.logs within the client code if you need to to verify the structure of show data.
