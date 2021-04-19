@@ -16,7 +16,7 @@ const testEpisode = {
 const testEpisodeWithoutImage = {
   id: 1,
   name: "",
-  image: undefined,
+  image: null,
   season: 1,
   number: 1,
   summary: "The show starts",
@@ -38,7 +38,13 @@ test("renders the summary test passed as prop", () => {
   expect(summary.innerHTML).toMatch("The show starts");
 });
 
-test("renders default image when image is not defined", () => {});
+test("renders default image when image is not defined", () => {
+  // Arrange
+  render(<Episode episode={testEpisodeWithoutImage} />);
+  const image = screen.getByRole("img");
+  // Act
+  // Assert
+});
 
 //Tasks
 //1. Complete a test that shows the Episode component renders. Pass in the provided example episode data as a test prop.
